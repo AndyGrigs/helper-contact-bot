@@ -49,5 +49,38 @@ class Record:
                 self.phones.remove(phone)
                 break
 
+    def edit_phone(self, old_phone_value, new_phone_value):
+        for i, phone in enumerate(self.phones):
+            if phone.value == old_phone_value:
+                phone_obj = Phone(new_phone_value)
+                phone_obj.validate()
+                self.phones[i] = phone_obj
+                break
 
-       
+    def find_phone(self, phone_value):
+        for phone in self.phones:
+            if phone.value == phone_value:
+                return phone
+        return None
+    
+    def add_birthday(self, birthday_date):
+        self.birthday = Birthday(birthday_date)
+
+    def __str__(self):
+        return f"Contact name: {self.name.value}, phones: {'; '.join(str(p) for p in self.phones)}"
+
+
+class AddressBook(UserDict):
+    def add_record(self, record):
+        self.__setitem__(record.name.value, record)
+
+    def find(self, name):
+        return self.get(name)
+
+    def delete(self, name):
+        del self[name]
+
+
+    def get_upcoming_birthdays(self, days=7):
+        pass
+        
