@@ -22,6 +22,8 @@ def add_contact(book: AddressBook):
     name = input("Enter the name of the contact: ").strip()
     phone = input("Enter the phone number of the contact: ").strip()
     birthday = input("Enter the birthday of the contact (DD.MM.YYYY) or press Enter to skip: ").strip()
+    address = input("Enter the address of the contact or press Enter to skip: ").strip()
+    email = input("Enter the email address of the contact or press Enter to skip: ").strip()
 
     # Create or update the contact record
     record = book.find(name)
@@ -42,6 +44,12 @@ def add_contact(book: AddressBook):
             record.add_birthday(birthday)
         except ValueError as e:
             return f"Error: {e}"
+
+    if address:
+        record.add_address(address)
+
+    if email:
+        record.add_email(email)
 
     return message
 
@@ -68,11 +76,15 @@ def show_phone(args, book: AddressBook):
 def show_all(args, book: AddressBook):
     if not book:
         return "Address book is empty."
+
     result = []
     for name, record in book.items():
         phones = "; ".join(str(phone) for phone in record.phones)
         birthday = f"Birthday: {record.birthday.date.strftime('%d.%m.%Y')}" if record.birthday else "Birthday: Not set"
-        result.append(f"{name}:\n Phones: {phones}\n {birthday}")
+        address = f"Address: {record.address}" if record.address else "Address: Not set"
+        email = f"Email: {record.email}" if record.email else "Email: Not set"
+        result.append(f"{name}:\n  Phones: {phones}\n  {birthday}\n  {address}\n  {email}")
+
     return "\n".join(result)
 
 @input_error

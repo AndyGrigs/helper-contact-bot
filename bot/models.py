@@ -37,14 +37,16 @@ class Record:
         self.name = Name(name)
         self.phones = []
         self.birthday = None
+        self.address = None
+        self.email = None
 
     def add_phone(self, phone):
         phone_obj = Phone(phone)
-        phone_obj.validate()
+        phone_obj.validate()  
         self.phones.append(phone_obj)
 
     def remove_phone(self, phone_value):
-         for phone in self.phones:
+        for phone in self.phones:
             if phone.value == phone_value:
                 self.phones.remove(phone)
                 break
@@ -66,9 +68,18 @@ class Record:
     def add_birthday(self, birthday_date):
         self.birthday = Birthday(birthday_date)
 
-    def __str__(self):
-        return f"Contact name: {self.name.value}, phones: {'; '.join(str(p) for p in self.phones)}"
+    def add_address(self, address):
+        self.address = address
 
+    def add_email(self, email):
+        self.email = email
+
+    def __str__(self):
+        phones = "; ".join(str(phone) for phone in self.phones)
+        birthday = f"Birthday: {self.birthday.date.strftime('%d.%m.%Y')}" if self.birthday else "Birthday: Not set"
+        address = f"Address: {self.address}" if self.address else "Address: Not set"
+        email = f"Email: {self.email}" if self.email else "Email: Not set"
+        return f"Contact name: {self.name.value}\n  Phones: {phones}\n  {birthday}\n  {address}\n  {email}"
 
 class AddressBook(UserDict):
     def add_record(self, record):
