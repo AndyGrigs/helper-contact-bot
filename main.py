@@ -4,7 +4,7 @@ import time
 from pick import pick
 from bot.models import AddressBook
 from bot.utils import load_data, save_data
-from bot.handlers import add_contact, edit_contact, change_contact, show_phone, show_all, add_birthday, show_birthday, birthdays
+from bot.handlers import add_contact, edit_contact, delete_contact, change_contact, show_phone, show_all, add_birthday, show_birthday, birthdays
 
 
 def parse_input(user_input):
@@ -47,13 +47,13 @@ def main():
     print("Welcome to the assistant bot!")
 
     while True:
-        # Define the list of commands and their descriptions
         commands = [
             ("Add Contact", "add"),
             ("Edit Contact", "edit"),
             ("Change Contact", "change"),
             ("Show Phone", "phone"),
             ("Show All", "all"),
+            ("Delete Contact", "delete"),
             ("Add Birthday", "add-birthday"),
             ("Show Birthday", "show-birthday"),
             ("Upcoming Birthdays", "birthdays"),
@@ -172,6 +172,13 @@ def main():
 
         elif command_keyword == "birthdays":
             message = birthdays([], book)
+            print(message)
+
+        elif command_keyword == "delete":
+            name = select_contact_name(book)
+            if not name:
+                continue
+            message = delete_contact([name], book)
             print(message)
 
         else:

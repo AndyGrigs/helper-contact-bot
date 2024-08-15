@@ -33,6 +33,34 @@ class Birthday(Field):
         except ValueError:
             raise ValueError('Invalid date format. Use DD.MM.YYYY')
         
+class Tag(Field):
+    def __init__(self, tag_name):
+        self.tag_name = tag_name
+
+    def __str__(self):
+        return self.tag_name
+
+class Note(Field):
+    def __init__(self, note_text):
+        self.note_text = note_text
+        self.tags = []
+
+    def add_tag(self, tag):
+        if isinstance(tag, Tag):
+            self.tags.append(tag)
+        else:
+            raise TypeError("Tag must be an instance of the Tag class.")
+
+    def remove_tag(self, tag_name):
+        for tag in self.tags:
+            if tag.tag_name == tag_name:
+                self.tags.remove(tag)
+                break
+
+    def __str__(self):
+        tags_str = ", ".join([str(tag) for tag in self.tags])
+        return f"Note: {self.note_text}. Tags: {tags_str}"
+        
 class Record:
     def __init__(self, name):
         self.name = Name(name)
@@ -40,6 +68,26 @@ class Record:
         self.birthday = None
         self.address = None
         self.email = None
+        self.notes= []
+
+    def add_note(self, note_text):
+        note = Note(note_text)
+        self.notes.append(note)
+
+    def add_tag_to_note(self, note_index, tag_name):
+        if 0 <= note_index < len(self.notes):
+            note = self.notes[note_index]
+            tag = Tag(tag_name)
+            note.add_tag(tag)
+        else:
+            raise IndexError("Note index out of range.")
+        
+    def remove_tag_from_note(self, note_index, tag_name):
+        if 0 <= note_index < len(self.notes):
+            note = self.notes[note_index]
+            note.remove_tag(tag_name)
+        else:
+            raise IndexError("Note index out of range.")
 
     def add_phone(self, phone):
         phone_obj = Phone(phone)
@@ -128,6 +176,8 @@ class AddressBook(UserDict):
                     })
 
         return upcoming_birthdays
+
+
 
 # # Example of how to use the AddressBook class
 # book = AddressBook()

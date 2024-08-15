@@ -9,6 +9,55 @@ def input_error(handler):
             return f"Error: {e}"
     return wrapper
 
+@input_error
+def add_note(args, book: AddressBook):
+    name, note_text = args
+    record = book.find(name)
+    if record is None:
+        return f"Contact '{name}' does not exist."
+    
+    record.add_note(note_text)
+    return f"Note added to '{name}'."
+
+
+@input_error
+def remove_note(args, book: AddressBook):
+    name, note_index = args
+    record = book.find(name)
+    if record is None:
+        return f"Contact '{name}' does not exist."
+    
+    try:
+        del record.notes[int(note_index)]
+        return f"Note {note_index} removed from '{name}'."
+    except IndexError:
+        return f"Note index {note_index} out of range for '{name}'."
+
+@input_error
+def add_tag_to_note(args, book: AddressBook):
+    name, note_index, tag_name = args
+    record = book.find(name)
+    if record is None:
+        return f"Contact '{name}' does not exist."
+    
+    try:
+        record.add_tag_to_note(int(note_index), tag_name)
+        return f"Tag '{tag_name}' added to note {note_index} of '{name}'."
+    except IndexError:
+        return f"Note index {note_index} out of range for '{name}'."
+
+@input_error
+def remove_tag_from_note(args, book: AddressBook):
+    name, note_index, tag_name = args
+    record = book.find(name)
+    if record is None:
+        return f"Contact '{name}' does not exist."
+    
+    try:
+        record.remove_tag_from_note(int(note_index), tag_name)
+        return f"Tag '{tag_name}' removed from note {note_index} of '{name}'."
+    except IndexError:
+        return f"Note index {note_index} out of range for '{name}'."
 
 # def add_contact(args, book: AddressBook):
 #     names, phone_number, birthday = args
@@ -39,7 +88,7 @@ def add_contact(args, book: AddressBook):
         record.add_email(email)
 
     if address:
-        record.add_address
+        record.add_address(address)
 
     return message
 
@@ -73,7 +122,14 @@ def edit_contact(args, book: AddressBook):
 
     return f"Contact '{contact_name}' has been updated."
 
-
+@input_error
+def delete_contact(args, book: AddressBook):
+    name = args[0]
+    if name not in book:
+        return f"Contact '{name}' does not exist."
+    
+    del book[name]
+    return f"Contact '{name}' has been removed."
 
 @input_error
 def change_contact(args, book: AddressBook):
