@@ -1,3 +1,4 @@
+from pick import pick
 from .models import AddressBook, Record
 
 def input_error(handler):
@@ -18,40 +19,81 @@ def input_error(handler):
 #     return "Contact added."
 
 @input_error
-def add_contact(book: AddressBook):
-    name = input("Enter the name of the contact: ").strip()
-    phone = input("Enter the phone number of the contact: ").strip()
-    birthday = input("Enter the birthday of the contact (DD.MM.YYYY) or press Enter to skip: ").strip()
-    address = input("Enter the address of the contact or press Enter to skip: ").strip()
-    email = input("Enter the email address of the contact or press Enter to skip: ").strip()
-
-    # Create or update the contact record
+def add_contact(args, book: AddressBook):
+    # args should be a list with name, phone, and birthday
+    name, phone, birthday, email = args
     record = book.find(name)
-    message = "Contact updated."
     if record is None:
         record = Record(name)
         book.add_record(record)
         message = "Contact added."
+    else:
+        message = "Contact updated."
 
     if phone:
-        try:
-            record.add_phone(phone)
-        except ValueError as e:
-            return f"Error: {e}"
-    
+        record.add_phone(phone)
     if birthday:
-        try:
-            record.add_birthday(birthday)
-        except ValueError as e:
-            return f"Error: {e}"
-
-    if address:
-        record.add_address(address)
-
-    if email:
-        record.add_email(email)
+        record.add_birthday(birthday)
 
     return message
+
+
+@input_error
+def edit_contact(args, book: AddressBook):
+    # Display the menu of fields to edit using pick
+    title = 'Please choose the field you want to edit:'
+    options = ['Phone', 'Email', 'Address']
+    
+    # Use pick to get the user's selection
+    field, index = pick(options, title, indicator='=>')
+
+    # Map the field to a standardized name
+    field_map = {
+        'Phone': 'phone',
+        'Email': 'email',
+        'Address': 'address'
+    }
+
+    field_name = field_map[field]
+    print(f"Attempting to edit contact: {field_name}")
+
+    # Prompt for the contact name
+    name = input("Enter the contact name: ").strip()
+
+    # Find the contact
+    record = book.find(name)
+    if record is None:
+        return "Contact not found."
+
+    if field_name == "phone":
+        # Prompt for old phone number and validate
+        old_value = input("Enter the current phone number to replace: ").strip()
+        if record.find_phone(old_value) is None:
+            return "Old phone number not found."
+        new_value = input("Enter the new phone number: ").strip()
+        try:
+            record.edit_phone(old_value, new_value)
+        except ValueError as e:
+            return f"Error: {e}"
+        return "Phone number updated."
+
+    elif field_name == "email":
+        # Prompt for new email
+        new_value = input("Enter the new email: ").strip()
+        try:
+            record.add_email(new_value)
+        except ValueError as e:
+            return f"Error: {e}"
+        return "Email updated."
+
+    elif field_name == "address":
+        # Prompt for new address
+        new_value = input("Enter the new address: ").strip()
+        record.add_address(new_value)
+        return "Address updated."
+
+    else:
+        return "Invalid field. Available fields are: phone, email, address."
 
 
 @input_error

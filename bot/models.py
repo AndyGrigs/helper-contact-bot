@@ -2,8 +2,6 @@ import re
 from collections import UserDict
 from datetime import timedelta, datetime, date
 
-
-
 class Field:
     def __init__(self, value):
         self.value = value
@@ -12,10 +10,14 @@ class Field:
         return str(self.value)
     
 
-    
+class Email(Field):
+    def validate(self):
+        pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+        if not re.match(pattern, self.value):
+            raise ValueError('Invalid email format.')
+
 class Name(Field):
     pass
-
 
 class Phone(Field):
     def validate(self):
@@ -23,14 +25,13 @@ class Phone(Field):
         if not re.match(pattern, self.value):
             raise ValueError('Invalid phone number format. Must be 10 digits.')
 
-
 class Birthday(Field):
     def __init__(self, value):
         super().__init__(value)
         try:
             self.date = datetime.strptime(value, "%d.%m.%Y").date()
         except ValueError:
-            raise ValueError('"Invalid date format. Use DD.MM.YYYY"')
+            raise ValueError('Invalid date format. Use DD.MM.YYYY')
         
 class Record:
     def __init__(self, name):
@@ -72,6 +73,8 @@ class Record:
         self.address = address
 
     def add_email(self, email):
+        email_obj = Email(email)
+        email_obj.validate()
         self.email = email
 
     def __str__(self):
@@ -86,20 +89,19 @@ class AddressBook(UserDict):
         self.__setitem__(record.name.value, record)
 
     def find(self, name):
-        return self.get(name)
-
-    def delete(self, name):
-        del self[name]
-
-    def find(self, name):
-        pass
+        # Convert search name to lower case for case-insensitive search
+        name = name.lower()
+        for contact_name, record in self.items():
+            if contact_name.lower() == name:
+                return record
+        return None
     
-    def get(self, contact_id):
-        pass
-
     def delete(self, name):
-        del self[name]
-
+        if name in self:
+            del self[name]
+        else:
+            raise KeyError(f"No contact found with the name: {name}")
+    
     def get_upcoming_birthdays(self, days=7):
         today = datetime.today().date()
         upcoming_birthdays = []
@@ -108,15 +110,13 @@ class AddressBook(UserDict):
         for record in self.values():
             birthday = getattr(record, 'birthday', None)
             if birthday is not None:
-                
                 birthday_this_year = date(today.year, birthday.date.month, birthday.date.day)
-                
                 
                 if birthday_this_year < today:
                     birthday_this_year = date(today.year + 1, birthday.date.month, birthday.date.day)
                 
                 if birthday_this_year <= one_week_from_today:
-                    if birthday_this_year.weekday() >= 5:  
+                    if birthday_this_year.weekday() >= 5:
                         next_monday = birthday_this_year + timedelta(days=(7 - birthday_this_year.weekday()))
                         congratulation_date = next_monday
                     else:
@@ -129,6 +129,35 @@ class AddressBook(UserDict):
 
         return upcoming_birthdays
 
+# # Example of how to use the AddressBook class
+# book = AddressBook()
 
-     
-        
+# # Adding a record to AddressBook
+# record = Record("John Doe")
+# record.add_phone("1234567890")
+# record.add_email("john.doe@example.com")
+# record.add_address("123 Elm Street")
+# record.add_birthday("01.01.1990")
+# book.add_record(record)
+
+# # Checking records in AddressBook
+# print("Current contacts in AddressBook:")
+# for name, record in book.items():
+#     print(record)
+
+# # Find a record
+# print("\nFinding a contact:")
+# contact = book.find("John Doe")
+# print(contact)
+
+# # Update record's phone
+# contact.edit_phone("1234567890", "0987654321")
+
+# # Checking records again
+# print("\nUpdated contacts in AddressBook:")
+# for name, record in book.items():
+#     print(record)
+
+# # Get upcoming birthdays
+# print("\nUpcoming birthdays:")
+# print(book.get_upcoming_birthdays())
