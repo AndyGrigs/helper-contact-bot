@@ -151,6 +151,7 @@ from models import AddressBook
 from utils import load_data, save_data
 from handlers import add_contact, change_contact, show_phone, show_all, add_birthday, show_birthday, birthdays
 
+
 def parse_input(user_input):
     # Implementation remains the same
 

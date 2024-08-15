@@ -80,7 +80,44 @@ class AddressBook(UserDict):
     def delete(self, name):
         del self[name]
 
+    def find(self, name):
+        pass
+    
+    def get(self, contact_id):
+        pass
+
+    def delete(self, name):
+        del self[name]
 
     def get_upcoming_birthdays(self, days=7):
-        pass
+        today = datetime.today().date()
+        upcoming_birthdays = []
+        one_week_from_today = today + timedelta(days=days)
+
+        for record in self.values():
+            birthday = getattr(record, 'birthday', None)
+            if birthday is not None:
+                
+                birthday_this_year = date(today.year, birthday.date.month, birthday.date.day)
+                
+                
+                if birthday_this_year < today:
+                    birthday_this_year = date(today.year + 1, birthday.date.month, birthday.date.day)
+                
+                if birthday_this_year <= one_week_from_today:
+                    if birthday_this_year.weekday() >= 5:  
+                        next_monday = birthday_this_year + timedelta(days=(7 - birthday_this_year.weekday()))
+                        congratulation_date = next_monday
+                    else:
+                        congratulation_date = birthday_this_year
+                    
+                    upcoming_birthdays.append({
+                        'name': record.name.value,
+                        'congratulation_date': congratulation_date.strftime("%d.%m.%Y")
+                    })
+
+        return upcoming_birthdays
+
+
+     
         
