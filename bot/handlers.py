@@ -21,7 +21,7 @@ def input_error(handler):
 @input_error
 def add_contact(args, book: AddressBook):
     # args should be a list with name, phone, and birthday
-    name, phone, birthday, email = args
+    name, phone, birthday, email, address = args
     record = book.find(name)
     if record is None:
         record = Record(name)
@@ -35,65 +35,44 @@ def add_contact(args, book: AddressBook):
     if birthday:
         record.add_birthday(birthday)
 
+    if email:
+        record.add_email(email)
+
+    if address:
+        record.add_address
+
     return message
 
 
 @input_error
 def edit_contact(args, book: AddressBook):
-    # Display the menu of fields to edit using pick
-    title = 'Please choose the field you want to edit:'
-    options = ['Phone', 'Email', 'Address']
-    
-    # Use pick to get the user's selection
-    field, index = pick(options, title, indicator='=>')
 
-    # Map the field to a standardized name
-    field_map = {
-        'Phone': 'phone',
-        'Email': 'email',
-        'Address': 'address'
-    }
 
-    field_name = field_map[field]
-    print(f"Attempting to edit contact: {field_name}")
+    if len(args) != 3:
+        raise ValueError("Incorrect number of arguments. Expected [contact_name, field_name, new_value].")
 
-    # Prompt for the contact name
-    name = input("Enter the contact name: ").strip()
+    contact_name, field_name, new_value = args
 
-    # Find the contact
-    record = book.find(name)
-    if record is None:
-        return "Contact not found."
+    # Validate contact existence
+    if contact_name not in book:
+        raise KeyError(f"Contact '{contact_name}' does not exist.")
 
-    if field_name == "phone":
-        # Prompt for old phone number and validate
-        old_value = input("Enter the current phone number to replace: ").strip()
-        if record.find_phone(old_value) is None:
-            return "Old phone number not found."
-        new_value = input("Enter the new phone number: ").strip()
-        try:
-            record.edit_phone(old_value, new_value)
-        except ValueError as e:
-            return f"Error: {e}"
-        return "Phone number updated."
+    # Validate field name
+    field_name = field_name.lower()
+    if field_name not in ['phone', 'email', 'address']:
+        raise ValueError("Invalid field. Valid fields are: phone, email, address.")
 
-    elif field_name == "email":
-        # Prompt for new email
-        new_value = input("Enter the new email: ").strip()
-        try:
-            record.add_email(new_value)
-        except ValueError as e:
-            return f"Error: {e}"
-        return "Email updated."
+    # Update the contact field
+    contact = book[contact_name]
+    if field_name == 'phone':
+        contact.phone = new_value
+    elif field_name == 'email':
+        contact.email = new_value
+    elif field_name == 'address':
+        contact.address = new_value
 
-    elif field_name == "address":
-        # Prompt for new address
-        new_value = input("Enter the new address: ").strip()
-        record.add_address(new_value)
-        return "Address updated."
+    return f"Contact '{contact_name}' has been updated."
 
-    else:
-        return "Invalid field. Available fields are: phone, email, address."
 
 
 @input_error
@@ -107,12 +86,21 @@ def change_contact(args, book: AddressBook):
 
 @input_error
 def show_phone(args, book: AddressBook):
-    name, *_ = args
+    if not args:
+        return "No contact name provided."
+
+    name = args[0].strip()
     record = book.find(name)
+    
     if record is None:
         return "Contact not found."
+    
+    if not record.phones:
+        return f"{name} has no phone numbers listed."
+    
     phones = "; ".join(str(phone) for phone in record.phones)
-    return f"Phones for {name}: {phones}"
+    return f"\nPhones for {name}: {phones}"
+
 
 @input_error
 def show_all(args, book: AddressBook):

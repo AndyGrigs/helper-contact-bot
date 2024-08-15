@@ -1,4 +1,5 @@
-# from bot.models import AddressBook
+import os
+from bot.models import AddressBook
 import time
 from pick import pick
 from bot.models import AddressBook
@@ -11,15 +12,35 @@ def parse_input(user_input):
 
 
 
+# def select_contact_name(book):
+#     """Helper function to select a contact name from the AddressBook."""
+#     names = list(book.keys())
+#     if not names:
+#         print("No contacts available.")
+#         return None
+#     title = "Please select a contact:"
+#     name, _ = pick(names, title, indicator='=>')
+#     return name
 def select_contact_name(book):
     """Helper function to select a contact name from the AddressBook."""
     names = list(book.keys())
     if not names:
         print("No contacts available.")
         return None
-    title = "Please select a contact:"
-    name, _ = pick(names, title, indicator='=>')
-    return name
+    print("Please select a contact:")
+    for idx, name in enumerate(names, 1):
+        print(f"{idx}. {name}")
+    choice = input("Enter the number of the contact: ").strip()
+    try:
+        index = int(choice) - 1
+        if 0 <= index < len(names):
+            return names[index]
+        else:
+            print("Invalid choice.")
+            return None
+    except ValueError:
+        print("Invalid input. Please enter a number.")
+        return None
 
 def main():
     book = load_data()
@@ -39,13 +60,28 @@ def main():
             ("Close", "close"),
             ("Exit", "exit")
         ]
-
+        print("Please choose a command:")
+        print(" ")
+        for idx, (desc, _) in enumerate(commands, 1):
+            print(f"{idx}. {desc}")
+        
+        choice = input("Enter the number of the command: ").strip()
+        try:
+            command_index = int(choice) - 1
+            if 0 <= command_index < len(commands):
+                command_description, command_keyword = commands[command_index]
+            else:
+                print("Invalid choice.")
+                continue
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+            continue
         # Display the dropdown menu and get the user's choice
-        title = "Please choose a command:"
-        command_description, _ = pick([cmd[0] for cmd in commands], title, indicator='=>')
+        # title = "Please choose a command:"
+        # command_description, _ = pick([cmd[0] for cmd in commands], title, indicator='=>')
 
-        # Map the selected command description to the command keyword
-        command_keyword = next(cmd[1] for cmd in commands if cmd[0] == command_description)
+        # # Map the selected command description to the command keyword
+        # command_keyword = next(cmd[1] for cmd in commands if cmd[0] == command_description)
 
         if command_keyword in ["close", "exit"]:
             save_data(book)
@@ -59,20 +95,40 @@ def main():
             name = input("Enter the contact name: ").strip()
             phone = input("Enter the phone number: ").strip()
             birthday = input("Enter the birthday (DD.MM.YYYY): ").strip()
-            message = add_contact([name, phone, birthday], book)
+            email = input("Enter the email: ").strip()
+            address = input("Enter the address: ").strip()
+            message = add_contact([name, phone, birthday, email, address], book)
             print(message)
 
         elif command_keyword == "edit":
             field_options = ['Phone', 'Email', 'Address']
-            field, _ = pick(field_options, "Select the field to edit:", indicator='=>')
+            
+            # Display field options
+            print("Select the field to edit:")
+            for idx, field in enumerate(field_options, 1):
+                print(f"{idx}. {field}")
+            
+            # Get user input for field selection
+            choice = input("Enter the number of the field: ").strip()
+            try:
+                field_index = int(choice) - 1
+                if 0 <= field_index < len(field_options):
+                    field = field_options[field_index].lower()
+                else:
+                    print("Invalid choice.")
+                    continue
+            except ValueError:
+                print("Invalid input. Please enter a number.")
+                continue
             
             name = select_contact_name(book)
             if not name:
                 continue
 
-            new_value = input(f"Enter the new {field.lower()}: ").strip()
-            message = edit_contact([name, field.lower(), new_value], book)
+            new_value = input(f"Enter the new {field}: ").strip()
+            message = edit_contact([name, field, new_value], book)
             print(message)
+
 
         elif command_keyword == "change":
             name = select_contact_name(book)
@@ -123,3 +179,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
