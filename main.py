@@ -1,7 +1,6 @@
 import os
 from bot.models import AddressBook
 import time
-from pick import pick
 from bot.models import AddressBook
 from bot.utils import load_data, save_data
 from bot.handlers import add_contact, edit_contact, delete_contact, change_contact, show_phone, show_all, add_birthday, show_birthday, birthdays
